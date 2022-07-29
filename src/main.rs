@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 fn main() {
-    let res_memo = memoize_fibo(20);
+    let res_memo = memoize_fibo(26);
     println!("res_memo: {}",  res_memo);
 }
 
@@ -43,3 +43,21 @@ pub fn memoize_fibo(num: u128) -> u128 {
     Fibo::new(num).fibo(num)
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_memoize_fibo() {
+        assert_eq!(memoize_fibo(2), 1u128); 
+        assert_eq!(memoize_fibo(10), 55); 
+        
+    }
+
+    #[test]
+    fn test_new_impl() {
+        assert_eq!(1,1);
+        assert_eq!(2,1);
+    }
+
+}
