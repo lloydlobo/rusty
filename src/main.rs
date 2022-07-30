@@ -2,10 +2,17 @@ use ::std::convert::TryInto;
 use std::collections::HashMap;
 
 fn main() {
-    let res_memo: u128 = memoize_fibo(22);
+    let mut arr_res_memo: Vec<u128> = Vec::new();
+    let res_memo: u128 = memoize_fibo(6);
     println!("res_memo: {}", res_memo);
+    arr_res_memo.push(res_memo);
+
+    let mut arr_memo_res_memo: Vec<u128> = Vec::new();
     let memo_res_memo: u128 = memo_memo_fibo(res_memo);
     println!("memo_res_memo: {}", memo_res_memo);
+    arr_memo_res_memo.push(memo_res_memo);
+
+    println!("arr_res: {:?}, arr_memo_res_memo: {:?}", arr_res_memo, arr_memo_res_memo);
 }
 
 pub fn memo_memo_fibo(num: u128) -> u128 {
@@ -24,7 +31,10 @@ pub fn memo_memo_fibo(num: u128) -> u128 {
             let prep_fibo_next: u128 = memoize_fibo(num);
             if !self.memo.contains_key(&num) {
                 self.memo.entry(num).or_insert(prep_fibo_next);
-            }
+            } 
+            // else {
+            //     return prep_fibo_next;
+            // }
             let memo_res: u128 = *self.memo.get(&num).unwrap();
 
             memo_res
