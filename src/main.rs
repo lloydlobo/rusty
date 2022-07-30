@@ -1,9 +1,38 @@
-use::std::convert::TryInto;
+use ::std::convert::TryInto;
 use std::collections::HashMap;
 
 fn main() {
-    let res_memo = memoize_fibo(26);
+    let res_memo: u128 = memoize_fibo(22);
     println!("res_memo: {}", res_memo);
+    let memo_res_memo: u128 = memo_memo_fibo(res_memo);
+    println!("memo_res_memo: {}", memo_res_memo);
+}
+
+pub fn memo_memo_fibo(num: u128) -> u128 {
+    pub struct MemoFibo {
+        memo: HashMap<u128, u128>,
+    }
+
+    impl MemoFibo {
+        pub fn new(num: u128) -> MemoFibo {
+            MemoFibo {
+                memo: HashMap::with_capacity(num.try_into().unwrap()),
+            }
+        }
+
+        pub fn memo_fibo(&mut self, num: u128) -> u128 {
+            let prep_fibo_next: u128 = memoize_fibo(num);
+            if !self.memo.contains_key(&num) {
+                self.memo.entry(num).or_insert(prep_fibo_next);
+            }
+            let memo_res: u128 = *self.memo.get(&num).unwrap();
+
+            memo_res
+        }
+    }
+    let res: u128 = MemoFibo::new(num).memo_fibo(num);
+
+    res
 }
 
 pub fn memoize_fibo(num: u128) -> u128 {

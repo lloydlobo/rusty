@@ -48,7 +48,7 @@ checksum = "263096c71368702759fdbae40a737bc2696ba04bea7bada70a011515647bd6f9"
 dependencies = [
  "anyhow",
  "cargo_metadata",
- "clap 3.2.15",
+ "clap 3.2.16",
  "cli-log",
  "crokey",
  "crossbeam",
@@ -90,9 +90,9 @@ checksum = "37ccbd214614c6783386c1af30caf03192f17891059cecc394b4fb119e363de3"
 
 [[package]]
 name = "bytes"
-version = "1.2.0"
+version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0b3de4a0c5e67e16066a0715723abd91edc2f9001d09c46e1dca929351e130e"
+checksum = "ec8a7b6a70fde80372154c65702f00a0f56f3e1c36abbc6c440484be248856db"
 
 [[package]]
 name = "camino"
@@ -163,9 +163,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.15"
+version = "3.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44bbe24bbd31a185bc2c4f7c2abe80bea13a20d57ee4e55be70ac512bdc76417"
+checksum = "a3dbbb6653e7c55cc8595ad3e1f7be8f32aba4eb7ff7f0fd1163d4f3d137c0a9"
 dependencies = [
  "atty",
  "bitflags",
