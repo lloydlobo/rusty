@@ -1,4 +1,3 @@
-use::std::convert::TryInto;
 use std::collections::HashMap;
 
 fn main() {
@@ -14,7 +13,7 @@ pub fn memoize_fibo(num: u128) -> u128 {
 
     impl Fibo {
         pub fn new(num: u128) -> Fibo {
-            let num_size: usize = TryInto::try_into(num).unwrap();
+            let num_size: usize = num.try_into().unwrap();
 
             Fibo {
                 memoize: HashMap::with_capacity(num_size),
