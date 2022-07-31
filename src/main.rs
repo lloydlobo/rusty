@@ -1,7 +1,10 @@
 pub(crate) mod fibo;
 pub(crate) mod std_file;
+pub mod memoize;
 
-use crate::{fibo::fibo_memoize::memoize_fibo, std_file::write_storage_local::write_storage_local};
+use crate::fibo::fibo_memoize::memoize_fibo;
+use crate::std_file::write_storage_local::write_storage_local;
+use crate::memoize::memoize;
 use std::{
     collections::HashMap,
     convert::TryInto,
@@ -13,12 +16,13 @@ use std::{
 fn main() {
     let path_fibo: &str = "compile_fib.txt";
     let path_cache: &str = "cache.txt";
+    let path_memo: &str = "memoize.txt";
     let num: u128 = 20;
 
-    let function: String = compile_fibo_to_string(num);
-    let fibo_num_u128: String = memoize_fibo(num).to_string();
-    write_fs_compile_fibo(path_cache.to_owned(), fibo_num_u128);
+    let fibo_num_u128: u128 = fibo::fibo_memoize::memoize_fibo(num);
+    write_fs_compile_fibo(path_cache.to_owned(), fibo_num_u128.to_string());
 
+    let function: String = compile_fibo_to_string(num);
     write_fs_compile_fibo(path_fibo.to_owned(), function);
     let res_read: Result<(), io::Error> = read_bytes_write_buf(path_fibo.to_owned());
     let res_string_read: String = read_lines_ok(path_fibo);
@@ -27,6 +31,8 @@ fn main() {
         " res_read: {:?}, res_string_read: {}",
         res_read, res_string_read
     );
+    let memoize_part_2: u128 = memoize(fibo_num_u128);
+    write_fs_compile_fibo(path_memo.to_owned(), memoize_part_2.to_string());
 }
 
 /// Caches results in local storage txt
@@ -88,7 +94,6 @@ pub fn read_bytes_write_buf(path_file: String) -> io::Result<()> {
 
     Ok(())
 }
-
 
 pub fn memo_memo_fibo(num: u128) -> u128 {
     pub struct MemoFibo {
