@@ -1,3 +1,7 @@
+pub(crate) mod fibo;
+pub(crate) mod std_file;
+
+use crate::{fibo::fibo_memoize::memoize_fibo, std_file::write_storage_local::write_storage_local};
 use std::{
     collections::HashMap,
     convert::TryInto,
@@ -5,9 +9,6 @@ use std::{
     io::{self, prelude::*, BufRead, BufReader, Lines},
     path::Path,
 };
-use crate::fibo::fibo_memoize::memoize_fibo;
-
-mod fibo;
 
 fn main() {
     let path_fibo: &str = "compile_fib.txt";
@@ -88,39 +89,6 @@ pub fn read_bytes_write_buf(path_file: String) -> io::Result<()> {
     Ok(())
 }
 
-/// Write to local storage using File
-pub fn write_storage_local(string_to_write: &str, path_file: String) {
-    let path: &Path = Path::new(&path_file);
-    let display: std::path::Display = path.display();
-    // Open a file in write-only mode, returns `io::Result<File>`
-    let mut file: File = match File::create(&path) {
-        Err(why) => panic!("couldn't create {}: {}", display, why),
-        Ok(file) => file,
-    };
-    println!("file:create: {:?}", file);
-    // Write the 'lorem_ipsum' strin to 'file', return `io::Result<()>`
-    match file.write_all(string_to_write.as_bytes()) {
-        Err(why) => panic!("couldn't write to {}: {}", display, why),
-        Ok(_) => println!("successfully wrote to {}", display),
-    }
-}
-
-pub fn process_memo_memoize_fibo(num: u128) {
-    let mut arr_res_memo: Vec<u128> = Vec::new();
-    let mut res_memo: u128 = 0;
-    for i in 1..num {
-        res_memo = memoize_fibo(i);
-        println!("res_memo: {}", res_memo);
-        arr_res_memo.push(res_memo);
-    }
-    let mut arr_memo_res_memo: Vec<u128> = Vec::new();
-    let memo_res_memo: u128 = memo_memo_fibo(res_memo);
-    for _ in arr_res_memo.iter().clone() {
-        arr_memo_res_memo.push(memo_res_memo);
-    }
-    // println!("arr_res_memo: {:?}", arr_memo_res_memo.iter()); println!("memo_res_memo: {}", memo_res_memo);
-    println!("arr_res: {:?}, {:?}", arr_res_memo, arr_memo_res_memo);
-}
 
 pub fn memo_memo_fibo(num: u128) -> u128 {
     pub struct MemoFibo {
