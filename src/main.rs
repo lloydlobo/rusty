@@ -12,7 +12,7 @@ fn main() {
     let path_fibo: &str = "compile_fib.txt";
     write_storage_local(LOREM_IPSUM, "lorem_ipsum.txt".to_string());
     process_memo_memoize_fibo(4);
-    write_fs_compile_fibo(9, path_fibo.to_owned());
+    write_fs_compile_fibo(39, path_fibo.to_owned());
 
     let res_read: Result<(), io::Error> = read_storage_local(path_fibo.to_owned());
     println!("res_read: {:?}", res_read);
