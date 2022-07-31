@@ -4,34 +4,29 @@ use std::io::prelude::*;
 use std::{collections::HashMap, convert::TryInto};
 use std::{fs::File, path::Path};
 
-fn main() {
-    write_storage_local(LOREM_IPSUM);
-    let mut arr_res_memo: Vec<u128> = Vec::new();
-    let mut res_memo: u128 = 0;
-    for i in 0..10 {
-        res_memo = memoize_fibo(i);
-        println!("res_memo: {}", res_memo);
-
-        arr_res_memo.push(res_memo);
-    }
-    let mut arr_memo_res_memo: Vec<u128> = Vec::new();
-    for _ in arr_res_memo.iter().clone() {
-        println!("arr_res_memo: {:?}", arr_memo_res_memo.iter());
-    }
-    let memo_res_memo: u128 = memo_memo_fibo(res_memo);
-    println!("memo_res_memo: {}", memo_res_memo);
-    arr_memo_res_memo.push(memo_res_memo);
-    println!(
-        "arr_res: {:?}, arr_memo_res_memo: {:?}",
-        arr_res_memo, arr_memo_res_memo
-    );
-}
-
 static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.";
 
+fn main() {
+    write_storage_local(LOREM_IPSUM,"lorem_ipsum.txt".to_string() );
+    process_memo_memoize_fibo(4);
+
+    let compile_fib: String = compile_fibo(4);
+    let compile_fib_len: usize = compile_fib.len();
+    println!("compile_fib_len: {}", compile_fib_len);
+
+    write_storage_local(&compile_fib, "compile_fib.txt".to_string()); 
+}
+
+fn compile_fibo(num: u128) -> String {
+    let res_memoize_fibo: u128 = memoize_fibo(num);
+    let res_u128_to_str: String = res_memoize_fibo.to_string();
+    res_u128_to_str
+    // let res_mefi_str: str = res_u128_to_str;
+}
+
 /// Write to local storage using File
-pub fn write_storage_local(string_to_write: &str) {
-    let path: &Path = Path::new("lorem_ipsum.txt");
+pub fn write_storage_local(string_to_write: &str, path_file: String) {
+    let path: &Path = Path::new(&path_file);
     let display: std::path::Display = path.display();
     // Open a file in write-only mode, returns `io::Result<File>`
     let mut file: File = match File::create(&path) {
@@ -44,6 +39,23 @@ pub fn write_storage_local(string_to_write: &str) {
         Err(why) => panic!("couldn't write to {}: {}", display, why),
         Ok(_) => println!("successfully wrote to {}", display),
     }
+}
+
+pub fn process_memo_memoize_fibo(num: u128) {
+    let mut arr_res_memo: Vec<u128> = Vec::new();
+    let mut res_memo: u128 = 0;
+    for i in 1..num {
+        res_memo = memoize_fibo(i);
+        println!("res_memo: {}", res_memo);
+        arr_res_memo.push(res_memo);
+    }
+    let mut arr_memo_res_memo: Vec<u128> = Vec::new();
+    let memo_res_memo: u128 = memo_memo_fibo(res_memo);
+    for _ in arr_res_memo.iter().clone() {
+        arr_memo_res_memo.push(memo_res_memo);
+    }
+    // println!("arr_res_memo: {:?}", arr_memo_res_memo.iter()); println!("memo_res_memo: {}", memo_res_memo);
+    println!("arr_res: {:?}, {:?}", arr_res_memo, arr_memo_res_memo);
 }
 
 pub fn memo_memo_fibo(num: u128) -> u128 {
