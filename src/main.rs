@@ -1,3 +1,5 @@
+mod fibo;
+
 use std::{
     collections::HashMap,
     convert::TryInto,
@@ -6,20 +8,28 @@ use std::{
     path::Path,
 };
 
-
 fn main() {
     let path_fibo: &str = "compile_fib.txt";
-    write_fs_compile_fibo(29, path_fibo.to_owned());
+    let num: u128 = 20;
+    let function: String = compile_fibo_to_string(num);
+    let function_u128: u128 = fibo::fibo_memoize::memoize_fibo(num);
+    println!("function_u128: {}", function_u128);
+    
+
+    write_fs_compile_fibo(path_fibo.to_owned(), function);
     let res_read: Result<(), io::Error> = read_bytes_write_buf(path_fibo.to_owned());
     let res_string_read: String = read_lines_ok(path_fibo);
 
-    println!(" res_read: {:?}, res_string_read: {}", res_read,res_string_read);
+    println!(
+        " res_read: {:?}, res_string_read: {}",
+        res_read, res_string_read
+    );
 }
 
 /// Caches results in local storage txt
-fn write_fs_compile_fibo(num: u128, path_file: String) {
-    let compile_fib: String = compile_fibo_to_string(num);
-    write_storage_local(&compile_fib, path_file);
+fn write_fs_compile_fibo(path_file: String, func: String) {
+    // let compile_fib: String = compile_fibo_to_string(num);
+    write_storage_local(&func, path_file);
 }
 
 /// Pushes fibonacci numbers into a string separated by a comma `,`
@@ -56,6 +66,7 @@ fn read_lines_ok(filename: &str) -> std::string::String {
 
     res_string
 }
+
 /// The output is wrapped in a Result to allow matching on errors
 /// Returns an Iterator to the Reader of the lines of the file.
 fn read_lines<P>(filename: P) -> io::Result<Lines<BufReader<File>>>
@@ -63,7 +74,6 @@ where
     P: AsRef<Path>,
 {
     let file_open: File = File::open(filename)?;
-
     Ok(BufReader::new(file_open).lines())
 }
 
@@ -173,19 +183,3 @@ pub fn memoize_fibo(num: u128) -> u128 {
     Fibo::new(num).fibo(num)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_memoize_fibo() {
-        assert_eq!(memoize_fibo(2), 1u128);
-        assert_eq!(memoize_fibo(10), 55);
-    }
-
-    #[test]
-    fn test_new_impl() {
-        assert_eq!(memoize_fibo(2), 1u128);
-        assert_eq!(memoize_fibo(1), 1u128);
-    }
-}
