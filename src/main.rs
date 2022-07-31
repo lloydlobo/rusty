@@ -1,5 +1,3 @@
-mod fibo;
-
 use std::{
     collections::HashMap,
     convert::TryInto,
@@ -7,14 +5,18 @@ use std::{
     io::{self, prelude::*, BufRead, BufReader, Lines},
     path::Path,
 };
+use crate::fibo::fibo_memoize::memoize_fibo;
+
+mod fibo;
 
 fn main() {
     let path_fibo: &str = "compile_fib.txt";
+    let path_cache: &str = "cache.txt";
     let num: u128 = 20;
+
     let function: String = compile_fibo_to_string(num);
-    let function_u128: u128 = fibo::fibo_memoize::memoize_fibo(num);
-    println!("function_u128: {}", function_u128);
-    
+    let fibo_num_u128: String = memoize_fibo(num).to_string();
+    write_fs_compile_fibo(path_cache.to_owned(), fibo_num_u128);
 
     write_fs_compile_fibo(path_fibo.to_owned(), function);
     let res_read: Result<(), io::Error> = read_bytes_write_buf(path_fibo.to_owned());
@@ -147,39 +149,3 @@ pub fn memo_memo_fibo(num: u128) -> u128 {
 
     res
 }
-
-pub fn memoize_fibo(num: u128) -> u128 {
-    #[derive()]
-    pub struct Fibo {
-        memoize: HashMap<u128, u128>,
-    }
-
-    impl Fibo {
-        pub fn new(num: u128) -> Fibo {
-            let num_size: usize = TryInto::try_into(num).unwrap();
-
-            Fibo {
-                memoize: HashMap::with_capacity(num_size),
-            }
-        }
-
-        pub fn fibo(&mut self, num: u128) -> u128 {
-            if num <= 2 {
-                return 1;
-            };
-            let prev = self.fibo(num - 2);
-            let curr = self.fibo(num - 1);
-            let fibo_next = prev + curr;
-
-            if !self.memoize.contains_key(&num) {
-                self.memoize.entry(num).or_insert(fibo_next);
-            }
-            let res: u128 = *self.memoize.get(&num).unwrap();
-
-            res
-        }
-    }
-
-    Fibo::new(num).fibo(num)
-}
-
