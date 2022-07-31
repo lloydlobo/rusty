@@ -1,27 +1,40 @@
 #[allow(unused_imports)]
 use std::io::prelude::*;
-
 use std::{collections::HashMap, convert::TryInto};
 use std::{fs::File, path::Path};
 
 static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.";
 
 fn main() {
-    write_storage_local(LOREM_IPSUM,"lorem_ipsum.txt".to_string() );
+    write_storage_local(LOREM_IPSUM, "lorem_ipsum.txt".to_string());
     process_memo_memoize_fibo(4);
-
-    let compile_fib: String = compile_fibo(4);
-    let compile_fib_len: usize = compile_fib.len();
-    println!("compile_fib_len: {}", compile_fib_len);
-
-    write_storage_local(&compile_fib, "compile_fib.txt".to_string()); 
+    write_fs_compile_fibo(4, "compile_fib.txt".to_string())
 }
 
-fn compile_fibo(num: u128) -> String {
-    let res_memoize_fibo: u128 = memoize_fibo(num);
-    let res_u128_to_str: String = res_memoize_fibo.to_string();
-    res_u128_to_str
-    // let res_mefi_str: str = res_u128_to_str;
+fn write_fs_compile_fibo(num: u128, path_file: String) {
+    let compile_fib: String = compile_fibo_to_string(num);
+    let compile_fib_len: usize = compile_fib.len();
+
+    println!("{} {}", path_file, compile_fib_len);
+
+    write_storage_local(&compile_fib, path_file);
+}
+
+/// Pushes fibonacci numbers into a string separated by a comma `,`
+fn compile_fibo_to_string(num: u128) -> String {
+    let mut res_string: String = String::new();
+    for i in 1..num {
+        let curr_fibo_str: String = memoize_fibo(i).to_string();
+
+        res_string.push_str(&curr_fibo_str);
+
+        if i < num - 1 && !curr_fibo_str.is_empty() {
+            res_string.push(',');
+        }
+    }
+    println!("result: {}", res_string);
+
+    res_string
 }
 
 /// Write to local storage using File
