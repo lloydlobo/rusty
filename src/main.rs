@@ -8,7 +8,7 @@ use std::{
 
 static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.";
 
-fn main() { 
+fn main() {
     let path_fibo: &str = "compile_fib.txt";
     write_storage_local(LOREM_IPSUM, "lorem_ipsum.txt".to_string());
     process_memo_memoize_fibo(4);
@@ -16,8 +16,8 @@ fn main() {
 
     let res_read: Result<(), io::Error> = read_storage_local(path_fibo.to_owned());
     println!("res_read: {:?}", res_read);
-
-    read_lines_ok();
+    // let path_hosts: &str = "./hosts";
+    read_lines_ok(path_fibo);
 }
 
 /// Caches results in local storage txt
@@ -46,15 +46,15 @@ fn compile_fibo_to_string(num: u128) -> String {
 
 // The method lines() returns an iterator over the lines of a file.
 // File::open expects a generic, AsRef<Path>. That's what read_lines() expects as input.
-fn read_lines_ok() {
-    let lines = match read_lines("./hosts") {
+fn read_lines_ok(filename: &str) {
+    let lines = match read_lines(filename) {
         Ok(it) => it,
         _ => return,
     };
     for line in lines {
         match line {
-            Ok(ip) => {
-                println!("ip: {}", ip);
+            Ok(result_read) => {
+                println!("result_read: {}", result_read);
             }
             Err(_) => todo!(),
         }
@@ -73,7 +73,6 @@ where
 /// Read the local storage using File
 pub fn read_storage_local(path_file: String) -> io::Result<()> {
     // let path = Path::new(&path_file);
-
     // let display = path.display();
     let mut buf = String::new();
     let mut file: File = File::open(path_file)?;
