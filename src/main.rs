@@ -1,33 +1,29 @@
-use std::io;
-#[allow(unused_imports)]
-use std::io::prelude::*;
-use std::{collections::HashMap, convert::TryInto};
-use std::{fs::File, path::Path};
+use std::{
+    collections::HashMap,
+    convert::TryInto,
+    fs::File,
+    io::{self, prelude::*, BufRead},
+    path::Path,
+};
 
 static LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.";
 
-fn main() {
+fn main() { 
     let path_fibo: &str = "compile_fib.txt";
     write_storage_local(LOREM_IPSUM, "lorem_ipsum.txt".to_string());
     process_memo_memoize_fibo(4);
-    write_fs_compile_fibo(40, path_fibo.to_owned());
+    write_fs_compile_fibo(9, path_fibo.to_owned());
+
     let res_read: Result<(), io::Error> = read_storage_local(path_fibo.to_owned());
     println!("res_read: {:?}", res_read);
-}
 
-#[allow(dead_code)]
-fn read_fs_compile_fibo_hashmap() {
-    struct FiboRead {
-        memoize: HashMap<u8, u128>,
-    }
-    impl FiboRead {}
+    read_lines_ok();
 }
 
 /// Caches results in local storage txt
 fn write_fs_compile_fibo(num: u128, path_file: String) {
     let compile_fib: String = compile_fibo_to_string(num);
     let compile_fib_len: usize = compile_fib.len();
-
     println!("{} {}", path_file, compile_fib_len);
 
     write_storage_local(&compile_fib, path_file);
@@ -38,9 +34,7 @@ fn compile_fibo_to_string(num: u128) -> String {
     let mut res_string: String = String::new();
     for i in 1..num {
         let curr_fibo_str: String = memoize_fibo(i).to_string();
-
         res_string.push_str(&curr_fibo_str);
-
         if i < num - 1 && !curr_fibo_str.is_empty() {
             res_string.push(',');
         }
@@ -50,10 +44,36 @@ fn compile_fibo_to_string(num: u128) -> String {
     res_string
 }
 
-/// Read the local storage using File
+// The method lines() returns an iterator over the lines of a file.
+// File::open expects a generic, AsRef<Path>. That's what read_lines() expects as input.
+fn read_lines_ok() {
+    let lines = match read_lines("./hosts") {
+        Ok(it) => it,
+        _ => return,
+    };
+    for line in lines {
+        match line {
+            Ok(ip) => {
+                println!("ip: {}", ip);
+            }
+            Err(_) => todo!(),
+        }
+    }
+}
+/// The output is wrapped in a Result to allow matching on errors
+/// Returns an Iterator to the Reader of the lines of the file.
+fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+where
+    P: AsRef<Path>,
+{
+    let file = File::open(filename)?;
+    Ok(io::BufReader::new(file).lines())
+}
 
+/// Read the local storage using File
 pub fn read_storage_local(path_file: String) -> io::Result<()> {
     // let path = Path::new(&path_file);
+
     // let display = path.display();
     let mut buf = String::new();
     let mut file: File = File::open(path_file)?;
