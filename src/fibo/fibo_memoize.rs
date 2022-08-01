@@ -49,5 +49,6 @@ mod tests {
     fn test_new_impl() {
         assert_eq!(memoize_fibo(2), 1u128);
         assert_eq!(memoize_fibo(1), 1u128);
+        assert_eq!(memoize_fibo(10), 55);
     }
 }

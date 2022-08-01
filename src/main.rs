@@ -1,16 +1,18 @@
-pub(crate) mod fibo;
-pub(crate) mod std_file;
-pub mod memoize;
-
-use crate::fibo::fibo_memoize::memoize_fibo;
-use crate::std_file::write_storage_local::write_storage_local;
-use crate::memoize::memoize;
 use std::{
     collections::HashMap,
     convert::TryInto,
     fs::File,
     io::{self, prelude::*, BufRead, BufReader, Lines},
     path::Path,
+};
+
+pub(crate) mod fibo;
+pub(crate) mod memoize;
+pub(crate) mod std_file;
+
+pub(crate) use crate::{
+    fibo::memoize_fibo, memoize::other_memoize as other_memoize,
+    std_file::write_storage_local::write_storage_local,
 };
 
 fn main() {
@@ -31,7 +33,7 @@ fn main() {
         " res_read: {:?}, res_string_read: {}",
         res_read, res_string_read
     );
-    let memoize_part_2: u128 = memoize(fibo_num_u128);
+    let memoize_part_2: u128 = other_memoize(fibo_num_u128);
     write_fs_compile_fibo(path_memo.to_owned(), memoize_part_2.to_string());
 }
 
