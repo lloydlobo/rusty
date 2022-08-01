@@ -33,13 +33,20 @@ pub fn loop_user_inputs() {
             .expect("Failed to read your input number!");
 
         let input_trim: &str = input_new_string.trim();
-        let input_num: u128 = input_trim.parse().unwrap();
 
-        let input_fibo_num: u128 = match Some(input_trim) {
-            Some(number) if number.trim().parse::<u128>().unwrap() == input_num => input_num,
-            Some(string) if string == input_trim => continue,
+        let _input_fibo_num: u128 = match Some(input_trim) {
+            Some(can_break)
+                if match_input_cli_user(can_break.to_owned()) == ControlFlow::Break(()) =>
+            {
+                break
+            }
+
+            Some(number_possible) if input_is_number(number_possible, input_trim) => {
+                println!("You entered number: {}", number_possible);
+                input_trim.parse().unwrap()
+            }
             Some(_) => continue,
-            None => todo!(),
+            None => panic!(),
         };
 
         if let ControlFlow::Break(_) = match_input_cli_user(input_trim.to_owned()) {
@@ -47,19 +54,29 @@ pub fn loop_user_inputs() {
         }
 
         println!("You entered: {}", input_trim);
-        println!("You entered number: {}", input_fibo_num);
-        
     }
 }
-// let input_cli_user: u128 = match input_new_string.trim().parse() {
-//     Ok(number) => number,
-//     Err(other) => {
-//         println!("Not a number, {}", other);
-//         let input_num_to_str = other.to_string();
-//         // continue;
-//         input_num_to_str
-//     } // enable when you loop the whole fn
-// };
+
+pub fn input_is_number(number_possible: &str, input_trim: &str) -> bool {
+    ({
+        match number_possible.trim().parse::<u128>() {
+            Ok(t) => t,
+            Err(_) => {
+                println!("Please enter a number");
+                0
+            }
+        }
+    }) == {
+        match input_trim.parse() {
+            Ok(t) => t,
+            Err(_) => {
+                println!("Please enter a number");
+                1
+            }
+        }
+    }
+}
+// let input_cli_user: u128 = match input_new_string.trim().parse() { Ok(number) => number, Err(other) => { println!("Not a number, {}", other); let input_num_to_str = other.to_string(); input_num_to_str } };
 
 fn match_input_cli_user(input: String) -> ControlFlow<()> {
     const OPT_YES: &str = "y";
