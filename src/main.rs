@@ -1,3 +1,4 @@
+use colored::*;
 use std::{
     collections::HashMap,
     convert::TryInto,
@@ -11,11 +12,16 @@ pub(crate) mod memoize;
 pub(crate) mod std_file;
 
 pub(crate) use crate::{
-    fibo::memoize_fibo, memoize::other_memoize as other_memoize,
-    std_file::write_storage_local::write_storage_local,
+    fibo::memoize_fibo, memoize::other_memoize, std_file::write_storage_local::write_storage_local,
 };
 
+pub fn welcome_user() {
+    println!("{}", "Welcome to fibonacci generator!".blue());
+    println!("{}", "You have to pick a index to fibonaize...\n".yellow());
+}
+
 fn main() {
+    welcome_user();
     let path_fibo: &str = "compile_fib.txt";
     let path_cache: &str = "cache.txt";
     let path_memo: &str = "memoize.txt";
@@ -33,8 +39,8 @@ fn main() {
         " res_read: {:?}, res_string_read: {}",
         res_read, res_string_read
     );
-    let memoize_part_2: u128 = other_memoize(fibo_num_u128);
-    write_fs_compile_fibo(path_memo.to_owned(), memoize_part_2.to_string());
+    // let memoize_part_2: u128 = other_memoize(fibo_num_u128);
+    // write_fs_compile_fibo(path_memo.to_owned(), memoize_part_2.to_string());
 }
 
 /// Caches results in local storage txt
