@@ -4,6 +4,7 @@ use std::{
     convert::TryInto,
     fs::File,
     io::{self, prelude::*, BufRead, BufReader, Lines},
+    ops::ControlFlow,
     path::Path,
 };
 
@@ -22,22 +23,66 @@ pub fn welcome_user() {
 }
 
 pub fn loop_user_inputs() {
-    println!("{} ", "\nType a number between 0 and 42\n".cyan().bold());
+    loop {
+        println!("{} ", "\nType a number between 0 and 42\n".cyan().bold());
+        let mut input_new_string: String = String::new();
+        // Give it text interactively by running the executable directly,
+        // in which case it will wait for the Enter key to be pressed before continuing
+        io::stdin()
+            .read_line(&mut input_new_string)
+            .expect("Failed to read your input number!");
 
-    let mut input = String::new();
-    // Give it text interactively by running the executable directly, 
-    // in which case it will wait for the Enter key to be pressed before continuing
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read your input number!");
+        let input_trim: &str = input_new_string.trim();
+        let input_num: u128 = input_trim.parse().unwrap();
 
-    let input: u128 = match input.trim().parse() {
-        Ok(number) => number,
-        // Err(_) => continue, // enable when you loop the whole fn
-        Err(_) => todo!(),
-    };
+        let input_fibo_num: u128 = match Some(input_trim) {
+            Some(number) if number.trim().parse::<u128>().unwrap() == input_num => input_num,
+            Some(string) if string == input_trim => continue,
+            Some(_) => continue,
+            None => todo!(),
+        };
 
-    println!("You guessed: {}", input);
+        if let ControlFlow::Break(_) = match_input_cli_user(input_trim.to_owned()) {
+            break;
+        }
+
+        println!("You entered: {}", input_trim);
+        println!("You entered number: {}", input_fibo_num);
+        
+    }
+}
+// let input_cli_user: u128 = match input_new_string.trim().parse() {
+//     Ok(number) => number,
+//     Err(other) => {
+//         println!("Not a number, {}", other);
+//         let input_num_to_str = other.to_string();
+//         // continue;
+//         input_num_to_str
+//     } // enable when you loop the whole fn
+// };
+
+fn match_input_cli_user(input: String) -> ControlFlow<()> {
+    const OPT_YES: &str = "y";
+    const OPT_NO: &str = "n";
+    const OPT_ALL: &str = "a";
+
+    println!("input: {}", input);
+    match Some(input) {
+        Some(yes) if yes == OPT_YES => {
+            println!("{}", yes);
+            ControlFlow::Continue(())
+        }
+        Some(no) if no == OPT_NO => {
+            println!("{}", no);
+            ControlFlow::Break(())
+        }
+        Some(all) if all == OPT_ALL => {
+            println!("{}", all);
+            ControlFlow::Continue(())
+        }
+        None => panic!(),
+        _ => ControlFlow::Continue(()),
+    }
 }
 
 fn main() {
