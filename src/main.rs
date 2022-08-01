@@ -11,6 +11,7 @@ pub(crate) mod fibo;
 pub(crate) mod memoize;
 pub(crate) mod std_file;
 
+#[allow(unused_imports)]
 pub(crate) use crate::{
     fibo::memoize_fibo, memoize::other_memoize, std_file::write_storage_local::write_storage_local,
 };
@@ -20,10 +21,39 @@ pub fn welcome_user() {
     println!("{}", "You have to pick a index to fibonaize...\n".yellow());
 }
 
+pub fn loop_user_inputs() {
+    println!("{} ", "\nType a number between 0 and 42\n".cyan().bold());
+
+    let mut input = String::new();
+    // Give it text interactively by running the executable directly, 
+    // in which case it will wait for the Enter key to be pressed before continuing
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read your input number!");
+
+    let input: u128 = match input.trim().parse() {
+        Ok(number) => number,
+        // Err(_) => continue, // enable when you loop the whole fn
+        Err(_) => todo!(),
+    };
+
+    println!("You guessed: {}", input);
+}
+
 fn main() {
     welcome_user();
+    loop_user_inputs();
+    system_fibo();
+}
+
+/////////////////////////////////////////////////////////////
+// start:           --- Helper Functions ---
+/////////////////////////////////////////////////////////////
+
+fn system_fibo() {
     let path_fibo: &str = "compile_fib.txt";
     let path_cache: &str = "cache.txt";
+    #[allow(unused_variables)]
     let path_memo: &str = "memoize.txt";
     let num: u128 = 20;
 
@@ -35,13 +65,16 @@ fn main() {
     let res_read: Result<(), io::Error> = read_bytes_write_buf(path_fibo.to_owned());
     let res_string_read: String = read_lines_ok(path_fibo);
 
+    // let memoize_part_2: u128 = other_memoize(fibo_num_u128);
+    // write_fs_compile_fibo(path_memo.to_owned(), memoize_part_2.to_string());
     println!(
         " res_read: {:?}, res_string_read: {}",
         res_read, res_string_read
     );
-    // let memoize_part_2: u128 = other_memoize(fibo_num_u128);
-    // write_fs_compile_fibo(path_memo.to_owned(), memoize_part_2.to_string());
 }
+/////////////////////////////////////////////////////////////
+// end:             --- Helper Functions ---
+/////////////////////////////////////////////////////////////
 
 /// Caches results in local storage txt
 fn write_fs_compile_fibo(path_file: String, func: String) {
