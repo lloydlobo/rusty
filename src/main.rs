@@ -43,6 +43,11 @@ pub fn input_is_no(can_break: &str) -> ControlFlow<()> {
     match_input_cli_user(can_break.to_owned())
 }
 
+// TODO add this to match Some if > 42 Break(())
+pub fn parse_num(num_input: String) -> u128 {
+    num_input.trim().parse::<u128>().unwrap()
+}
+
 fn print_fibo_from_input(input_str: &str, get_num: u128) {
     let fibo_num_u128: u128 = fibo::fibo_memoize::memoize_fibo(get_num);
     println!("The fibonacci for: {} is: {}", input_str, fibo_num_u128);
@@ -52,32 +57,39 @@ pub fn loop_user_inputs() -> u128 {
 
     loop {
         println!("{} ", "\nType a number between 0 and 42\n".cyan().bold());
-        let mut input_new_string: String = String::new();
-
+        let mut input_string: String = String::new();
         io::stdin()
-            .read_line(&mut input_new_string)
+            .read_line(&mut input_string)
             .expect("Failed to read your input number!");
+        let input: &str = input_string.trim();
 
-        let input_new_str_trim: &str = input_new_string.trim();
-
-        match Some(input_new_str_trim) {
-            Some(input_str_trim_no) if input_is_no(input_str_trim_no) == ControlFlow::Break(()) => {
-                break
+        match Some(input) {
+            Some(num_negative) if num_negative.to_owned().parse::<i128>().unwrap() < 0 => {
+                println!("please enter a value between 0 & 42, {}", num_negative);
+                continue;
             }
-            Some(input_str_trim_num) if input_is_number(input_str_trim_num, input_new_str_trim) => {
-                num_u128 = get_num_from_loop(input_str_trim_num);
-                print_fibo_from_input(input_str_trim_num, num_u128);
-                num_u128
+            Some(exit) if input_is_no(exit) == ControlFlow::Break(()) => {
+                println!("{} ", "\nExiting. Thank you!\n".cyan().bold());
+                break;
+            }
+            Some(num) if input_is_number(num, input) => {
+                if parse_num(num.to_owned()) > 42 {
+                    println!("please enter a value between 0 & 42, {}", input);
+                    continue;
+                } else {
+                    num_u128 = get_num_from_loop(num);
+                    print_fibo_from_input(num, num_u128);
+                    num_u128
+                }
             }
             Some(_) => continue,
             None => panic!(),
         };
 
-        if let ControlFlow::Break(_) = input_is_no(input_new_str_trim) {
+        if let ControlFlow::Break(_) = input_is_no(input) {
             break;
         }
-
-        println!("You entered: {}", input_new_str_trim);
+        println!("You entered: {}", input);
     }
 
     num_u128
@@ -242,3 +254,39 @@ pub fn memo_memo_fibo(num: u128) -> u128 {
 
     res
 }
+
+/*
+ *
+use std::fs;
+use std::num;
+
+enum CliError {
+    IoError(io::Error),
+    ParseError(num::ParseIntError),
+}
+
+impl From<io::Error> for CliError {
+    fn from(error: io::Error) -> Self {
+        CliError::IoError(error)
+    }
+}
+
+impl From<num::ParseIntError> for CliError {
+    fn from(error: num::ParseIntError) -> Self {
+        CliError::ParseError(error)
+    }
+}
+
+fn open_and_parse_file(file_name: &str) -> Result<i32, CliError> {
+    let mut contents = fs::read_to_string(&file_name)?;
+    let num: i32 = contents.trim().parse()?;
+    Ok(num)
+}
+
+fn open_and_parse_file(file_name: &str) -> Result<i32, CliError> {
+    let mut contents: String = fs::read_to_string(&file_name)?;
+    let num: i32 = contents.trim().parse()?;
+    Ok(num)
+}
+ *
+ */
