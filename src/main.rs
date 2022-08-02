@@ -2,8 +2,9 @@ use colored::*;
 use std::{
     collections::HashMap,
     convert::TryInto,
-    fs::File,
+    fs::{read_to_string, File},
     io::{self, prelude::*, BufRead, BufReader, Lines},
+    num::ParseIntError,
     ops::ControlFlow,
     path::Path,
 };
@@ -20,10 +21,64 @@ pub(crate) use crate::{
 /////////////////////////////////////////////////////////////
 // start:           --- Main Function ---
 /////////////////////////////////////////////////////////////
+const PATH: &str = "loop_user.txt";
+
 fn main() {
     welcome_user();
-    let _res_loop_input: u128 = loop_user_inputs();
-    system_fibo();
+    let res_loop_input: u128 = loop_user_inputs();
+
+    if File::open(PATH).is_err() {
+        let first_write = write_to_file(res_loop_input, PATH);
+        println!("first_write_ok: {:?}", first_write);
+    } else {
+        let write_result: Result<(), io::Error> = write_to_file(res_loop_input, PATH);
+        println!("write_ok: {:?}", write_result);
+
+        let read_result = read_file_buf(PATH);
+        println!("read_result: {:?}", read_result);
+    }
+
+    // let read: i32 = cli_main(PATH).unwrap(); println!("read: {:?}", read);
+    // system_fibo();
+}
+
+fn read_file_buf(file_name: &str) -> std::io::Result<u128> {
+    let bytes_usize;
+    let file = File::open(file_name)?;
+
+    let mut buf_reader: BufReader<File> = BufReader::new(file);
+    let mut contents: String = String::new();
+    match buf_reader.read_to_string(&mut contents) {
+        Ok(it) => {
+            bytes_usize = it;
+            bytes_usize
+        }
+        Err(err) => return Err(err),
+    };
+
+    let get_content: String = match read_to_string(&file_name) {
+        Ok(it) => it,
+        Err(err) => return Err(err),
+    };
+
+    let parse_content: u128 = {
+        match get_content.trim().parse::<u128>() {
+            Ok(t) => t,
+            Err(e) => panic!("called `Result::unwrap()` on an `Err` value {}", e),
+        }
+    };
+
+    Ok(parse_content)
+}
+
+fn write_to_file(input: u128, file_name: &str) -> std::io::Result<()> {
+    let mut file = File::create(file_name)?;
+    match file.write_all(input.to_string().as_bytes()) {
+        Ok(it) => it,
+        Err(err) => return Err(err),
+    };
+
+    Ok(())
 }
 /////////////////////////////////////////////////////////////
 // end:           --- Main Function ---
@@ -47,9 +102,10 @@ pub fn parse_num(num_input: String) -> u128 {
     num_input.trim().parse::<u128>().unwrap()
 }
 
-fn print_fibo_from_input(input_str: &str, get_num: u128) {
+fn print_fibo_from_input(input_str: &str, get_num: u128) -> u128 {
     let fibo_num_u128: u128 = fibo::fibo_memoize::memoize_fibo(get_num);
     println!("The fibonacci for: {} is: {}", input_str, fibo_num_u128);
+    fibo_num_u128
 }
 
 pub fn input_is_integer(num: &str) -> bool {
@@ -59,11 +115,12 @@ pub fn input_is_integer(num: &str) -> bool {
 
 pub fn loop_user_inputs() -> u128 {
     let mut num_u: u128 = 0;
+    let mut num_res: u128 = 1;
 
     loop {
         println!("{} ", "\nType a number between 0 and 42\n".cyan().bold());
         let mut input_string: String = String::new();
-         
+
         io::stdin()
             .read_line(&mut input_string)
             .expect("Failed to read your input number!");
@@ -93,7 +150,8 @@ pub fn loop_user_inputs() -> u128 {
                 match Some(num) {
                     Some(num) if input_is_number(num, input) => {
                         num_u = get_num_from_loop(num);
-                        print_fibo_from_input(num, num_u);
+                        num_res = print_fibo_from_input(num, num_u);
+
                         num_u
                     }
                     Some(_) => continue,
@@ -114,7 +172,8 @@ pub fn loop_user_inputs() -> u128 {
         // println!("You entered: {}", input);
     }
 
-    num_u
+    println!("Fibo for {} is {}", num_u, num_res);
+    num_res
 }
 
 pub fn input_is_number(num: &str, input_trim: &str) -> bool {
@@ -304,3 +363,45 @@ fn open_and_parse_file(file_name: &str) -> Result<i32, CliError> {
 }
  *
  */
+
+pub struct Cli;
+
+#[derive(Debug)]
+enum CliError {
+    IoError(io::Error),
+    ParseError(ParseIntError),
+}
+
+impl From<io::Error> for CliError {
+    fn from(error: io::Error) -> Self {
+        CliError::IoError(error)
+    }
+}
+
+impl From<ParseIntError> for CliError {
+    fn from(error: ParseIntError) -> Self {
+        CliError::ParseError(error)
+    }
+}
+
+fn cli_main(file_name: &str) -> std::result::Result<i32, CliError> {
+    impl Cli {
+        pub fn new() -> Self {
+            Self
+        }
+
+        fn open_and_parse_file(file_name: &str) -> Result<i32, CliError> {
+            let contents = read_to_string(&file_name)?;
+            let num: i32 = contents.trim().parse()?;
+            Ok(num)
+        }
+    }
+
+    Cli::open_and_parse_file(file_name)
+}
+
+impl Default for Cli {
+    fn default() -> Self {
+        Self::new()
+    }
+}
