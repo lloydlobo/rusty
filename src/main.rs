@@ -54,7 +54,7 @@ fn print_fibo_from_input(input_str: &str, get_num: u128) {
 
 pub fn input_is_integer(num: &str) -> bool {
     let integer = { num.to_owned().parse::<i128>().unwrap_or(0) };
-    integer.is_positive() || integer.is_negative()
+    integer.is_positive() || integer.is_negative() || integer == 0
 }
 
 pub fn loop_user_inputs() -> u128 {
