@@ -17,6 +17,18 @@ pub(crate) use crate::{
     fibo::memoize_fibo, memoize::other_memoize, std_file::write_storage_local::write_storage_local,
 };
 
+/////////////////////////////////////////////////////////////
+// start:           --- Main Function ---
+/////////////////////////////////////////////////////////////
+fn main() {
+    welcome_user();
+    let _res_loop_input: u128 = loop_user_inputs();
+    system_fibo();
+}
+/////////////////////////////////////////////////////////////
+// end:           --- Main Function ---
+/////////////////////////////////////////////////////////////
+
 pub fn welcome_user() {
     println!("{}", "Welcome to fibonacci generator!".blue());
     println!("{}", "You have to pick a index to fibonaize...\n".yellow());
@@ -31,6 +43,10 @@ pub fn input_is_no(can_break: &str) -> ControlFlow<()> {
     match_input_cli_user(can_break.to_owned())
 }
 
+fn print_fibo_from_input(input_str: &str, get_num: u128) {
+    let fibo_num_u128: u128 = fibo::fibo_memoize::memoize_fibo(get_num);
+    println!("The fibonacci for: {} is: {}", input_str, fibo_num_u128);
+}
 pub fn loop_user_inputs() -> u128 {
     let mut num_u128: u128 = 0;
 
@@ -42,22 +58,26 @@ pub fn loop_user_inputs() -> u128 {
             .read_line(&mut input_new_string)
             .expect("Failed to read your input number!");
 
-        let input_trim: &str = input_new_string.trim();
+        let input_new_str_trim: &str = input_new_string.trim();
 
-        match Some(input_trim) {
-            Some(can_break) if input_is_no(can_break) == ControlFlow::Break(()) => break,
-            Some(number_possible) if input_is_number(number_possible, input_trim) => {
-                num_u128 = get_num_from_loop(number_possible);
+        match Some(input_new_str_trim) {
+            Some(input_str_trim_no) if input_is_no(input_str_trim_no) == ControlFlow::Break(()) => {
+                break
+            }
+            Some(input_str_trim_num) if input_is_number(input_str_trim_num, input_new_str_trim) => {
+                num_u128 = get_num_from_loop(input_str_trim_num);
+                print_fibo_from_input(input_str_trim_num, num_u128);
+                num_u128
             }
             Some(_) => continue,
             None => panic!(),
         };
 
-        if let ControlFlow::Break(_) = input_is_no(input_trim) {
+        if let ControlFlow::Break(_) = input_is_no(input_new_str_trim) {
             break;
         }
 
-        println!("You entered: {}", input_trim);
+        println!("You entered: {}", input_new_str_trim);
     }
 
     num_u128
@@ -103,14 +123,6 @@ fn match_input_cli_user(input: String) -> ControlFlow<()> {
         None => panic!(),
         _ => ControlFlow::Continue(()),
     }
-}
-
-fn main() {
-    welcome_user();
-    let res_loop_input: u128 = loop_user_inputs();
-    let fibo_num_u128: u128 = fibo::fibo_memoize::memoize_fibo(res_loop_input);
-    println!("The fibonacci for: {} is: {}",res_loop_input, fibo_num_u128);
-    system_fibo();
 }
 
 /////////////////////////////////////////////////////////////
