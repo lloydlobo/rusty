@@ -39,7 +39,7 @@ pub fn get_num_from_loop(input_str: &str) -> u128 {
     num
 }
 
-pub fn input_is_no(can_break: &str) -> ControlFlow<()> {
+pub fn input_exit(can_break: &str) -> ControlFlow<()> {
     match_input_cli_user(can_break.to_owned())
 }
 
@@ -54,70 +54,77 @@ fn print_fibo_from_input(input_str: &str, get_num: u128) {
 
 pub fn input_is_integer(num: &str) -> bool {
     let integer = { num.to_owned().parse::<i128>().unwrap_or(0) };
-
     integer.is_positive() || integer.is_negative()
 }
 
 pub fn loop_user_inputs() -> u128 {
-    let mut num_u128: u128 = 0;
+    let mut num_u: u128 = 0;
 
     loop {
         println!("{} ", "\nType a number between 0 and 42\n".cyan().bold());
         let mut input_string: String = String::new();
+         
         io::stdin()
             .read_line(&mut input_string)
             .expect("Failed to read your input number!");
+
         let input: &str = input_string.trim();
 
         match Some(input) {
-            Some(exit) if input_is_no(exit) == ControlFlow::Break(()) => {
+            Some(exit) if input_exit(exit) == ControlFlow::Break(()) => {
                 println!("{} ", "\nExiting. Thank you!\n".bright_green().bold());
                 break;
             }
             Some(num) if input_is_integer(num) => {
-                if input_is_number(num, input) {
-                    if num.parse::<i128>().unwrap() > 42 || num.parse::<i128>().unwrap() < 0 {
-                        println!("{}", "Please enter a value between 0 & 42.".yellow());
+                let num_i: i128 = num.parse::<i128>().unwrap();
+                match Some(num_i) {
+                    Some(num_i) if num_i.is_negative() && num_i != 0 => {
+                        println!("{}", "Enter a positive number between 0 & 42.".yellow());
                         continue;
-                    } else {
-                        num_u128 = get_num_from_loop(num);
-                        print_fibo_from_input(num, num_u128);
-                        num_u128
                     }
-                } else {
-                    println!("{}", "Please enter a positive number".on_green());
-                    continue;
-                }
+                    Some(num_i) if num_i > 42 => {
+                        println!("{}", "Enter a number between 0 & 42.".yellow());
+                        continue;
+                    }
+                    Some(_) => (),
+                    None => (),
+                };
+
+                match Some(num) {
+                    Some(num) if input_is_number(num, input) => {
+                        num_u = get_num_from_loop(num);
+                        print_fibo_from_input(num, num_u);
+                        num_u
+                    }
+                    Some(_) => continue,
+                    None => continue,
+                };
             }
-            Some(_) => continue,
+            Some(_) => {
+                println!("{}", "Please enter a number".red().bold());
+                continue;
+            }
             None => panic!(),
-            // Some(num_negative) if ({ match num_negative.to_owned().parse::<i128>() { Ok(t) => t, Err(_) => continue, } }) < 0 => { println!("{}", "Please enter a value between 0 & 42".red()); continue; }
         };
 
-        if let ControlFlow::Break(_) = input_is_no(input) {
+        if let ControlFlow::Break(_) = input_exit(input) {
+            println!("{} ", "\nExiting. Thank you!\n".bright_green().bold());
             break;
         }
         // println!("You entered: {}", input);
     }
 
-    num_u128
+    num_u
 }
 
-pub fn input_is_number(number_possible: &str, input_trim: &str) -> bool {
-    ({
-        match number_possible.trim().parse::<u128>() {
-            Ok(t) => t,
-            Err(_) => {
-                println!("Please enter a number");
-                0
-            }
+pub fn input_is_number(num: &str, input_trim: &str) -> bool {
+    (match num.trim().parse::<u128>() {
+        Ok(t) => t,
+        Err(_) => {
+            println!("Please enter a number");
+            0
         }
-    }) == {
-        input_trim.parse().unwrap_or({
-            // println!("Please enter a number");
-            1
-        })
-    }
+    }) == { input_trim.parse().unwrap_or(1) }
 }
 
 fn match_input_cli_user(input: String) -> ControlFlow<()> {
