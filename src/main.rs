@@ -22,39 +22,45 @@ pub fn welcome_user() {
     println!("{}", "You have to pick a index to fibonaize...\n".yellow());
 }
 
-pub fn loop_user_inputs() {
+pub fn get_num_from_loop(input_str: &str) -> u128 {
+    let num: u128 = input_str.parse().unwrap();
+    num
+}
+
+pub fn input_is_no(can_break: &str) -> ControlFlow<()> {
+    match_input_cli_user(can_break.to_owned())
+}
+
+pub fn loop_user_inputs() -> u128 {
+    let mut num_u128: u128 = 0;
+
     loop {
         println!("{} ", "\nType a number between 0 and 42\n".cyan().bold());
         let mut input_new_string: String = String::new();
-        // Give it text interactively by running the executable directly,
-        // in which case it will wait for the Enter key to be pressed before continuing
+
         io::stdin()
             .read_line(&mut input_new_string)
             .expect("Failed to read your input number!");
 
         let input_trim: &str = input_new_string.trim();
 
-        let _input_fibo_num: u128 = match Some(input_trim) {
-            Some(can_break)
-                if match_input_cli_user(can_break.to_owned()) == ControlFlow::Break(()) =>
-            {
-                break
-            }
-
+        match Some(input_trim) {
+            Some(can_break) if input_is_no(can_break) == ControlFlow::Break(()) => break,
             Some(number_possible) if input_is_number(number_possible, input_trim) => {
-                println!("You entered number: {}", number_possible);
-                input_trim.parse().unwrap()
+                num_u128 = get_num_from_loop(number_possible);
             }
             Some(_) => continue,
             None => panic!(),
         };
 
-        if let ControlFlow::Break(_) = match_input_cli_user(input_trim.to_owned()) {
+        if let ControlFlow::Break(_) = input_is_no(input_trim) {
             break;
         }
 
         println!("You entered: {}", input_trim);
     }
+
+    num_u128
 }
 
 pub fn input_is_number(number_possible: &str, input_trim: &str) -> bool {
@@ -67,13 +73,10 @@ pub fn input_is_number(number_possible: &str, input_trim: &str) -> bool {
             }
         }
     }) == {
-        match input_trim.parse() {
-            Ok(t) => t,
-            Err(_) => {
-                println!("Please enter a number");
-                1
-            }
-        }
+        input_trim.parse().unwrap_or({
+            // println!("Please enter a number");
+            1
+        })
     }
 }
 // let input_cli_user: u128 = match input_new_string.trim().parse() { Ok(number) => number, Err(other) => { println!("Not a number, {}", other); let input_num_to_str = other.to_string(); input_num_to_str } };
@@ -104,7 +107,9 @@ fn match_input_cli_user(input: String) -> ControlFlow<()> {
 
 fn main() {
     welcome_user();
-    loop_user_inputs();
+    let res_loop_input: u128 = loop_user_inputs();
+    let fibo_num_u128: u128 = fibo::fibo_memoize::memoize_fibo(res_loop_input);
+    println!("The fibonacci for: {} is: {}",res_loop_input, fibo_num_u128);
     system_fibo();
 }
 
