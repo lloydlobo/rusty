@@ -10,12 +10,16 @@ use std::{
 };
 
 pub(crate) mod fibo;
+pub(crate) mod r#loop;
 pub(crate) mod memoize;
 pub(crate) mod std_file;
 
 #[allow(unused_imports)]
 pub(crate) use crate::{
-    fibo::memoize_fibo, memoize::other_memoize, std_file::write_storage_local::write_storage_local,
+    fibo::memoize_fibo,
+    memoize::other_memoize,
+    r#loop::loop_struct::Loop,
+    std_file::{file_system::FileSystem, write_storage_local::write_storage_local},
 };
 
 /////////////////////////////////////////////////////////////
@@ -26,60 +30,24 @@ const PATH: &str = "loop_user.txt";
 fn main() {
     welcome_user();
     let res_loop_input: u128 = loop_user_inputs();
-
-    if File::open(PATH).is_err() {
-        let first_write = write_to_file(res_loop_input, PATH);
-        println!("first_write_ok: {:?}", first_write);
-    } else {
-        let write_result: Result<(), io::Error> = write_to_file(res_loop_input, PATH);
-        println!("write_ok: {:?}", write_result);
-
-        let read_result = read_file_buf(PATH);
-        println!("read_result: {:?}", read_result);
-    }
-
+    write_read_to_file(res_loop_input, PATH);
+    //
     // let read: i32 = cli_main(PATH).unwrap(); println!("read: {:?}", read);
     // system_fibo();
 }
 
-fn read_file_buf(file_name: &str) -> std::io::Result<u128> {
-    let bytes_usize;
-    let file = File::open(file_name)?;
-
-    let mut buf_reader: BufReader<File> = BufReader::new(file);
-    let mut contents: String = String::new();
-    match buf_reader.read_to_string(&mut contents) {
-        Ok(it) => {
-            bytes_usize = it;
-            bytes_usize
-        }
-        Err(err) => return Err(err),
-    };
-
-    let get_content: String = match read_to_string(&file_name) {
-        Ok(it) => it,
-        Err(err) => return Err(err),
-    };
-
-    let parse_content: u128 = {
-        match get_content.trim().parse::<u128>() {
-            Ok(t) => t,
-            Err(e) => panic!("called `Result::unwrap()` on an `Err` value {}", e),
-        }
-    };
-
-    Ok(parse_content)
+fn write_read_to_file(input: u128, file_name: &str) {
+    if File::open(file_name).is_err() {
+        let first_write = FileSystem::write_to_file(input, file_name);
+        println!("first_write_ok: {:?}", first_write);
+    } else {
+        let write_result: Result<(), io::Error> = FileSystem::write_to_file(input, file_name);
+        println!("write_ok: {:?}", write_result);
+        let read_result = FileSystem::read_file_buf(file_name);
+        println!("read_result: {:?}", read_result);
+    }
 }
 
-fn write_to_file(input: u128, file_name: &str) -> std::io::Result<()> {
-    let mut file = File::create(file_name)?;
-    match file.write_all(input.to_string().as_bytes()) {
-        Ok(it) => it,
-        Err(err) => return Err(err),
-    };
-
-    Ok(())
-}
 /////////////////////////////////////////////////////////////
 // end:           --- Main Function ---
 /////////////////////////////////////////////////////////////
@@ -87,30 +55,6 @@ fn write_to_file(input: u128, file_name: &str) -> std::io::Result<()> {
 pub fn welcome_user() {
     println!("{}", "Welcome to fibonacci generator!".blue());
     println!("{}", "You have to pick a index to fibonaize...\n".yellow());
-}
-
-pub fn get_num_from_loop(input_str: &str) -> u128 {
-    let num: u128 = input_str.parse().unwrap();
-    num
-}
-
-pub fn input_exit(can_break: &str) -> ControlFlow<()> {
-    match_input_cli_user(can_break.to_owned())
-}
-
-pub fn parse_num(num_input: String) -> u128 {
-    num_input.trim().parse::<u128>().unwrap()
-}
-
-fn print_fibo_from_input(input_str: &str, get_num: u128) -> u128 {
-    let fibo_num_u128: u128 = fibo::fibo_memoize::memoize_fibo(get_num);
-    println!("The fibonacci for: {} is: {}", input_str, fibo_num_u128);
-    fibo_num_u128
-}
-
-pub fn input_is_integer(num: &str) -> bool {
-    let integer = { num.to_owned().parse::<i128>().unwrap_or(0) };
-    integer.is_positive() || integer.is_negative() || integer == 0
 }
 
 pub fn loop_user_inputs() -> u128 {
@@ -128,11 +72,11 @@ pub fn loop_user_inputs() -> u128 {
         let input: &str = input_string.trim();
 
         match Some(input) {
-            Some(exit) if input_exit(exit) == ControlFlow::Break(()) => {
+            Some(exit) if Loop::input_exit(exit) == ControlFlow::Break(()) => {
                 println!("{} ", "\nExiting. Thank you!\n".bright_green().bold());
                 break;
             }
-            Some(num) if input_is_integer(num) => {
+            Some(num) if Loop::input_is_integer(num) => {
                 let num_i: i128 = num.parse::<i128>().unwrap();
                 match Some(num_i) {
                     Some(num_i) if num_i.is_negative() && num_i != 0 => {
@@ -148,9 +92,12 @@ pub fn loop_user_inputs() -> u128 {
                 };
 
                 match Some(num) {
-                    Some(num) if input_is_number(num, input) => {
-                        num_u = get_num_from_loop(num);
-                        num_res = print_fibo_from_input(num, num_u);
+                    Some(num) if Loop::input_is_number(num, input) => {
+                        num_u = {
+                            let num: u128 = num.parse().unwrap();
+                            num
+                        };
+                        num_res = Loop::print_fibo_from_input(num, num_u);
 
                         num_u
                     }
@@ -165,7 +112,7 @@ pub fn loop_user_inputs() -> u128 {
             None => panic!(),
         };
 
-        if let ControlFlow::Break(_) = input_exit(input) {
+        if let ControlFlow::Break(_) = Loop::input_exit(input) {
             println!("{} ", "\nExiting. Thank you!\n".bright_green().bold());
             break;
         }
@@ -174,40 +121,6 @@ pub fn loop_user_inputs() -> u128 {
 
     println!("Fibo for {} is {}", num_u, num_res);
     num_res
-}
-
-pub fn input_is_number(num: &str, input_trim: &str) -> bool {
-    (match num.trim().parse::<u128>() {
-        Ok(t) => t,
-        Err(_) => {
-            println!("Please enter a number");
-            0
-        }
-    }) == { input_trim.parse().unwrap_or(1) }
-}
-
-fn match_input_cli_user(input: String) -> ControlFlow<()> {
-    const OPT_YES: &str = "y";
-    const OPT_NO: &str = "n";
-    const OPT_ALL: &str = "a";
-
-    // println!("input: {}", input);
-    match Some(input) {
-        Some(yes) if yes == OPT_YES => {
-            println!("{}", yes);
-            ControlFlow::Continue(())
-        }
-        Some(no) if no == OPT_NO => {
-            println!("{}", no);
-            ControlFlow::Break(())
-        }
-        Some(all) if all == OPT_ALL => {
-            println!("{}", all);
-            ControlFlow::Continue(())
-        }
-        None => panic!(),
-        _ => ControlFlow::Continue(()),
-    }
 }
 
 /////////////////////////////////////////////////////////////
